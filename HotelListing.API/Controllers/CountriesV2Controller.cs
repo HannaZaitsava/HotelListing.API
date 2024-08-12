@@ -2,45 +2,38 @@
 using HotelListing.API.Contracts;
 using HotelListing.API.Data;
 using HotelListing.API.Exceptions;
-using HotelListing.API.Models;
 using HotelListing.API.Models.Country;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.API.Controllers
 {
     [Route("api/v{version:apiVersion}/countries")]
     [ApiController]
-    [ApiVersion("1.0", Deprecated = true)]
-    public class CountriesController : ControllerBase
+    [ApiVersion("2.0")]
+    public class CountriesV2Controller : ControllerBase
     {
         private readonly ICountriesRepository _сountriesRepository;
         private readonly IMapper _mapper;
-        private readonly ILogger<CountriesController> _logger;
+        private readonly ILogger<CountriesV2Controller> _logger;
 
-        public CountriesController(ICountriesRepository сountriesRepository, IMapper mapper, ILogger<CountriesController> logger)
+        public CountriesV2Controller(ICountriesRepository сountriesRepository, IMapper mapper, ILogger<CountriesV2Controller> logger)
         {
             _сountriesRepository = сountriesRepository;
             _mapper = mapper;
             _logger = logger;
         }
 
-        // GET: api/Countries/GetAll
-        [HttpGet("GetAll")]
+        // GET: api/Countries
+        [HttpGet]
+        [EnableQuery]
         public async Task<ActionResult<IEnumerable<GetCountryDto>>> GetCountries()
         {
             var countries = await _сountriesRepository.GetAllAsync();
             var records = _mapper.Map<List<GetCountryDto>>(countries);
             return Ok(records);
-        }
-
-        // GET: api/Countries/?StartIndex=0&PageSize=25&PageNumber=1
-        [HttpGet]
-        public async Task<ActionResult<PagedResult<GetCountryDto>>> GetPagedCountries([FromQuery] QueryParameters qParams)
-        {
-            var pagedCountriesResult = await _сountriesRepository.GetAllAsync<GetCountryDto>(qParams);
-            return Ok(pagedCountriesResult);
         }
 
         // GET: api/Countries/5
